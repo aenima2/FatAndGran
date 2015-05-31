@@ -5,6 +5,14 @@ public class ProjectileBase : MonoBehaviour {
 
     public float m_movementSpeed;
 
+    public float m_lifeSpan;
+
+
+    public virtual void Start()
+    {
+        Invoke("AutoKill", m_lifeSpan);
+    }
+
     public virtual void Update()
     {
         transform.position += transform.forward * m_movementSpeed * Time.deltaTime;
@@ -13,10 +21,22 @@ public class ProjectileBase : MonoBehaviour {
 
     void OnCollisionEnter(Collision col)
     {
-        if (!col.gameObject.CompareTag("Player"))
-            return;
+        switch (col.gameObject.tag)
+	    {
+            case "Player":
+                // destroy self and player
+                Destroy(gameObject);
+                //GameManager.Instance.DestroyPlayer(col.gameObject.GetComponent<Controller>());
+                break;
+            case "Shield":
+                // destroy self
+                Destroy(gameObject);
+                break;
+	    }
+    }
 
-        // destroy self
+    void AutoKill()
+    {
         Destroy(gameObject);
     }
 }
