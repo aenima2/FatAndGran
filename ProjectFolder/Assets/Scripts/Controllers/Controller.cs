@@ -46,12 +46,22 @@ public class Controller : MonoBehaviour {
         // movement
         switch (m_playerInput)
         {
-            // HL: needs something else than transform
+            // HL: needs something else than Translate?
             case PInput.Keyboard01:
             case PInput.Keyboard02:
                 m_inputX = Input.GetAxis("Horizontal" + m_number);
                 m_inputZ = Input.GetAxis("Vertical" + m_number);
-                transform.Translate(new Vector3(m_inputX, 0, m_inputZ) * m_speed * Time.deltaTime);
+                Vector3 targetPos = new Vector3(m_inputX, 0, m_inputZ);
+
+                if (targetPos == Vector3.zero)
+                {
+                    return;
+                }
+
+                // HL: fix problem with player can't stand idly in turned pos
+                // rotate and move
+                transform.rotation = Quaternion.LookRotation(targetPos);//, Vector3.up);
+                transform.Translate(targetPos * m_speed * Time.deltaTime, Space.World);
                 break;
             // HL: needs to support hovering characters
             case PInput.Mouse:

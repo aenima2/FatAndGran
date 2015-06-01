@@ -18,18 +18,23 @@ public class EnemyBase : MonoBehaviour {
     public float m_rotationSpeed;
 
     bool m_reloading = false;
+    bool m_incapacitated = false;
+
+    Animator m_animator;
 
 
     public virtual void Start()
     {
         StartCoroutine(GetClosestPlayer());
+        m_animator = GetComponent<Animator>();
+        m_animator.enabled = false;
     }
 
     public virtual void Update()
     {
-        Debug.DrawRay(transform.position, Vector3.forward * 10, Color.red);
+        Debug.DrawRay(transform.position, transform.forward * 10, Color.red);
 
-        if (m_closestTarget == null)
+        if (m_closestTarget == null || m_incapacitated)
             return;
 
         switch (m_currentState)
@@ -44,6 +49,7 @@ public class EnemyBase : MonoBehaviour {
                 {
                     StartCoroutine(Attack());
                 }
+
                 break;
             case EnemyState.Move:
                 // stop attacking
@@ -108,11 +114,32 @@ public class EnemyBase : MonoBehaviour {
         StartCoroutine(GetClosestPlayer());
     }
 
+    public void Incapacitate()
+    {
+        m_incapacitated = true;
+
+        // trigger animation
+        m_animator.enabled = true;
+        m_animator.SetTrigger("Hit");
+
+        Invoke("Recover", 5f);
+    }
+
+    void Recover()
+    {
+        m_animator.SetTrigger("Normal");
+        m_animator.enabled = false;
+
+        m_incapacitated = false;
+    }
+
     void OnCollisionEnter(Collision col)
     {
-        if(!col.gameObject.CompareTag("Player"))
-            return;
+        //if(!col.gameObject.CompareTag("Player"))
+        //    return;
 
-        GameManager.Instance.DestroyPlayer(col.gameObject.GetComponent<Controller>());
+        //Debug.Log("on collision enter " + col.gameObject);
+
+        //GameManager.Instance.DestroyPlayer(col.gameObject.GetComponent<Controller>());
     }
  }
